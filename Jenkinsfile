@@ -2,7 +2,7 @@ pipeline {
     agent {
         docker {
             image 'maven:3.9.0'
-            args "-u $(id -u):$(id -g) -v /root/.m2:/root/.m2"
+            args "-u \$(id -u):\$(id -g) -v /root/.m2:/root/.m2"
         }
     }
     stages {
@@ -21,10 +21,10 @@ pipeline {
                 }
             }
         }
-    //     stage('Deliver') {
-    //         steps {
-    //             sh './jenkins/scripts/deliver.sh'
-    //         }
-    //     }
-     }
+        // stage('Deliver') {
+        //     steps {
+        //         sh './jenkins/scripts/deliver.sh'
+        //     }
+        // }
+    }
 }
