@@ -1,26 +1,18 @@
 #!/usr/bin/env bash
 
-echo 'The following Maven command installs your Maven-built Java application'
-echo 'into the local Maven repository, which will ultimately be stored in'
-echo 'Jenkins''s local Maven repository (and the "maven-repository" Docker data'
-echo 'volume).'
-set -x
-mvn jar:jar install:install help:evaluate -Dexpression=project.name
-set +x
+EC2_USER="ubuntu"
+EC2_HOST="3.0.102.131"
+EC2_KEY="../../maspangsor.pem"
+APP_JAR="target/simple-java-maven-app.jar"
+DEPLOY_DIR="/home/ubuntu/simple-java-maven-app"
 
-echo 'The following command extracts the value of the <name/> element'
-echo 'within <project/> of your Java/Maven project''s "pom.xml" file.'
-set -x
-NAME=`mvn -q -DforceStdout help:evaluate -Dexpression=project.name`
-set +x
+echo "Mengirim file JAR ke EC2 instance..."
+scp -i "$EC2_KEY" "$APP_JAR" "$EC2_USER@$EC2_HOST:$DEPLOY_DIR/"
 
-echo 'The following command behaves similarly to the previous one but'
-echo 'extracts the value of the <version/> element within <project/> instead.'
-set -x
-VERSION=`mvn -q -DforceStdout help:evaluate -Dexpression=project.version`
-set +x
+echo "Menghentikan aplikasi yang sedang berjalan (jika ada)..."
+ssh -i "$EC2_KEY" "$EC2_USER@$EC2_HOST" "pkill -f simple-java-maven-app.jar || echo 'Tidak ada aplikasi yang berjalan'"
 
-echo 'The following command runs and outputs the execution of your Java'
-echo 'application (which Jenkins built using Maven) to the Jenkins UI.'
-set -x
-java -jar target/${NAME}-${VERSION}.jar
+echo "Menjalankan aplikasi Java di EC2 instance..."
+ssh -i "$EC2_KEY" "$EC2_USER@$EC2_HOST" "nohup java -jar $DEPLOY_DIR/$(basename $APP_JAR) > /dev/null 2>&1 &"
+
+echo "Deploy selesai. Aplikasi berjalan di http://$EC2_HOST:8080"
