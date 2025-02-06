@@ -9,7 +9,11 @@ pipeline {
     stages {
         stage('Build') {
             steps {
-                sh 'mvn -B -DskipTests clean package'
+                sh '''
+                    USER root
+                    rm -rf target/
+                    mvn -B -DskipTests clean package
+                '''
             }
         }
 
