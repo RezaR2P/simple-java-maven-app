@@ -32,7 +32,7 @@ pipeline {
         stage('Deploy') {
             steps {
                 script {
-                    // Install openssh-client (which includes scp)
+                    // Install openssh-client (which includes scp) as root
                     sh 'apt-get update && apt-get install -y openssh-client'
 
                     // Define variables
