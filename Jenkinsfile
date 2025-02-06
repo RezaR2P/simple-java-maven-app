@@ -10,7 +10,6 @@ pipeline {
         stage('Build') {
             steps {
                 sh '''
-                    USER root
                     rm -rf target/
                     mvn -B -DskipTests clean package
                 '''
