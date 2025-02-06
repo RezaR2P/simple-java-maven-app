@@ -42,6 +42,7 @@ pipeline {
                     def artifactPath = 'target/my-app-1.0-SNAPSHOT.jar' // Path to the built artifact
 
                     // Copy the artifact to the EC2 instance
+                    sh "chmod 400 ${pemFile}"
                     sh "scp -i ${pemFile} -o StrictHostKeyChecking=no ${artifactPath} ${ec2User}@${ec2Host}:/path/on/ec2/"
 
                     // Execute the deployment script on the EC2 instance
