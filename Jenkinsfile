@@ -2,7 +2,7 @@ pipeline {
     agent {
         docker {
             image 'maven:3.9.0'
-            args '-v /root/.m2:/root/.m2'
+            args '-v /root/.m2:/root/.m2 -v /home/rezar2p/Documents/0-reza/jenkins/simple-java-maven-app/maspangsor.pem:/maspangsor.pem'
         }
     }
 
