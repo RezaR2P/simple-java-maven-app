@@ -6,11 +6,6 @@ pipeline {
         }
     }
     stages {
-        stage('Clean') {
-            steps {
-                sh 'rm -rf target/*'
-            }
-        }
         stage('Build') {
             steps {
                 sh 'mvn -B -DskipTests clean package -X'
@@ -37,6 +32,9 @@ pipeline {
         stage('Deploy') {
             steps {
                 script {
+                    // Install openssh-client (which includes scp)
+                    sh 'apt-get update && apt-get install -y openssh-client'
+
                     // Define variables
                     def ec2User = 'ubuntu' // Your EC2 username
                     def ec2Host = 'ec2-3-0-102-131.ap-southeast-1.compute.amazonaws.com' // Your EC2 instance's public DNS
