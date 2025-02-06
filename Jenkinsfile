@@ -30,36 +30,34 @@ pipeline {
             }
         }
 
-        stage('Deploy') {
-            steps {
-                sh '''
-                    set -e
-                    
-                    SSH_KEY="/home/rezar2p/Documents/0-reza/maspangsor.pem"
-                    
-                    if [ ! -f "$SSH_KEY" ]; then
-                        echo "ERROR: SSH Key not found at $SSH_KEY"
-                        exit 1
-                    fi
+stage('Deploy') {
+    steps {
+        sh '''
+            set -e
+            
+            SSH_KEY="/home/rezar2p/Documents/0-reza/maspangsor.pem"
+            
+            if [ ! -f "$SSH_KEY" ]; then
+                echo "ERROR: SSH Key not found at $SSH_KEY"
+                exit 1
+            fi
 
-                    chmod 600 "$SSH_KEY"
+            chmod 600 "$SSH_KEY"
 
-                    EC2_HOST="ubuntu@ec2-3-0-102-131.ap-southeast-1.compute.amazonaws.com"
+            EC2_HOST="ubuntu@ec2-3-0-102-131.ap-southeast-1.compute.amazonaws.com"
 
-                    # Install dependency jika belum tersedia
-                    apt-get update && apt-get install -y sshpass openssh-client
+            # Install dependency jika belum tersedia
+            USER root
+            apt-get update && apt-get install -y sshpass openssh-client
 
-                    # Test SSH connection
-                    ssh -o StrictHostKeyChecking=no -i "$SSH_KEY" $EC2_HOST 'echo "SSH connection successful"'
+            # Test SSH connection
+            ssh -o StrictHostKeyChecking=no -i "$SSH_KEY" $EC2_HOST 'echo "SSH connection successful"'
 
-                    # Copy JAR file to EC2
-                    scp -o StrictHostKeyChecking=no -i "$SSH_KEY" target/*.jar $EC2_HOST:/home/ubuntu/
+            # Copy JAR file to EC2
+            scp -o StrictHostKeyChecking=no -i "$SSH_KEY" target/*.jar $EC2_HOST:/home/ubuntu/
 
-                    # (Opsional) Jalankan aplikasi di EC2
-                    ssh -o StrictHostKeyChecking=no -i "$SSH_KEY" $EC2_HOST 'nohup java -jar /home/ubuntu/*.jar > /home/ubuntu/app.log 2>&1 &'
-                '''
-                sleep(time: 1, unit: 'MINUTES')
-            }
-        }
+            # (Opsional) Jalankan aplikasi di EC2
+            ssh -o StrictHostKeyChecking=no -i "$SSH_KEY" $EC2_HOST 'nohup java -jar /home/ubuntu/*.jar > /home/ubuntu/app.log 2>&1 &'
+        '''
     }
 }
