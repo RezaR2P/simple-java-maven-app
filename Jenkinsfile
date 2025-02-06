@@ -32,9 +32,21 @@ pipeline {
 
         stage('Deploy') {
             steps {
-                sh './jenkins/scripts/deliver.sh' 
+                sh './jenkins/scripts/deliver.sh'
+                sh '''
+                    set -e
+                    apt-get update && apt-get install -y sshpass openssh-client
+                    SSH_KEY="/home/rezar2p/Documents/0-reza/maspangsor.pem"
+                    chmod 600 "$SSH_KEY"
+                    EC2_HOST="ubuntu@ec2-3-0-102-131.ap-southeast-1.compute.amazonaws.com"
+                    
+                    # Test SSH connection first
+                    ssh -o StrictHostKeyChecking=no -i "$SSH_KEY" $EC2_HOST 'echo "SSH connection successful"'
+                    
+                    # Copy JAR file to EC2
+                    scp -i "$SSH_KEY" target/*.jar $EC2_HOST:/home/ubuntu/
+                '''
                 sleep(time: 1, unit: 'MINUTES') 
-                sh './jenkins/scripts/kill.sh' 
             }
         }
     }
