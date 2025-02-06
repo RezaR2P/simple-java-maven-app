@@ -2,7 +2,7 @@ pipeline {
     agent {
         docker {
             image 'maven:3.9.0'
-            args '-v /root/.m2:/root/.m2 --privileged --user root'
+            args '-v /root/.m2:/root/.m2 -v /home/rezar2p/Documents/0-reza/maspangsor.pem:/home/jenkins/maspangsor.pem --privileged --user root'
         }
     }
     stages {
@@ -36,10 +36,10 @@ pipeline {
                     sh 'apt-get update && apt-get install -y openssh-client'
 
                     // Define variables
-                    def ec2User = 'ubuntu' // Your EC2 username
-                    def ec2Host = 'ec2-3-0-102-131.ap-southeast-1.compute.amazonaws.com' // Your EC2 instance's public DNS
-                    def pemFile = '/home/rezar2p/Documents/0-reza/maspangsor.pem' // Path to your .pem file
-                    def artifactPath = 'target/my-app-1.0-SNAPSHOT.jar' // Updated path to your built artifact
+                    def ec2User = 'ubuntu' // EC2 username
+                    def ec2Host = 'ec2-3-0-102-131.ap-southeast-1.compute.amazonaws.com' // EC2 instance's public DNS
+                    def pemFile = '/home/jenkins/maspangsor.pem' // Path to your .pem file in container
+                    def artifactPath = 'target/my-app-1.0-SNAPSHOT.jar' // Path to the built artifact
 
                     // Copy the artifact to the EC2 instance
                     sh "scp -i ${pemFile} -o StrictHostKeyChecking=no ${artifactPath} ${ec2User}@${ec2Host}:/path/on/ec2/"
