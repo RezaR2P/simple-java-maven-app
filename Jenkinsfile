@@ -32,7 +32,7 @@ pipeline {
 
         stage('Deploy') {
             steps {
-                sh 'apt-get update && apt-get install -y sshpass openssh-client'
+                sh 'apt-get install -y sshpass openssh-client'
                 sh 'chmod 600 /maspangsor.pem'
                 sh 'ssh -o StrictHostKeyChecking=no -i "/maspangsor.pem" ubuntu@ec2-3-0-102-131.ap-southeast-1.compute.amazonaws.com "echo SSH connection successful"'
                 sh 'scp -i "/maspangsor.pem" target/*.jar ubuntu@ec2-3-0-102-131.ap-southeast-1.compute.amazonaws.com:/home/ubuntu/'
