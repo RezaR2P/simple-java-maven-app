@@ -32,20 +32,22 @@ pipeline {
         stage('Deploy') {
             steps {
                 script {
-                    // Install openssh-client (which includes scp) as root
+                    // Instal openssh-client (yang termasuk scp) sebagai root
                     sh 'apt-get update && apt-get install -y openssh-client'
 
-                    // Define variables
-                    def ec2User = 'ubuntu' // EC2 username
-                    def ec2Host = 'ec2-3-0-102-131.ap-southeast-1.compute.amazonaws.com' // EC2 instance's public DNS
-                    def pemFile = '/home/jenkins/maspangsor.pem' // Path to your .pem file in container
-                    def artifactPath = 'target/my-app-1.0-SNAPSHOT.jar' // Path to the built artifact
+                    // Definisikan variabel
+                    def ec2User = 'ubuntu' // Nama pengguna EC2 Anda
+                    def ec2Host = 'ec2-3-0-102-131.ap-southeast-1.compute.amazonaws.com' // DNS publik instance EC2 Anda
+                    def pemFile = '/home/jenkins/maspangsor.pem' // Path ke file .pem di dalam kontainer
+                    def artifactPath = 'target/my-app-1.0-SNAPSHOT.jar' // Path ke artefak yang telah dibangun
 
-                    // Copy the artifact to the EC2 instance
+                    // Set izin untuk file .pem
                     sh "chmod 400 ${pemFile}"
+
+                    // Salin artefak ke instance EC2
                     sh "scp -i ${pemFile} -o StrictHostKeyChecking=no ${artifactPath} ${ec2User}@${ec2Host}:/path/on/ec2/"
 
-                    // Execute the deployment script on the EC2 instance
+                    // Jalankan skrip deployment di instance EC2
                     sh "ssh -i ${pemFile} -o StrictHostKeyChecking=no ${ec2User}@${ec2Host} 'bash /path/on/ec2/deploy-script.sh'"
                 }
                 sleep(time: 1, unit: 'MINUTES')
