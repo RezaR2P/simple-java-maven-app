@@ -35,8 +35,7 @@ pipeline {
                 sh './jenkins/scripts/deliver.sh'
                 sh '''
                     set -e
-                    USER root
-                    apt-get update && apt-get install -y sshpass openssh-client
+                    sudo apt-get update && sudo apt-get install -y sshpass openssh-client
                     SSH_KEY="/simple-java-maven-app/maspangsor.pem"
                     chmod 600 "$SSH_KEY"
                     EC2_HOST="ubuntu@ec2-3-0-102-131.ap-southeast-1.compute.amazonaws.com"
