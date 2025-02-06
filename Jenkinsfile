@@ -36,7 +36,7 @@ pipeline {
                 sh '''
                     set -e
                     apt-get update && apt-get install -y sshpass openssh-client
-                    SSH_KEY="/simple-java-maven-app/maspangsor.pem"
+                    SSH_KEY="/root/.ssh/maspangsor.pem"
                     chmod 600 "$SSH_KEY"
                     EC2_HOST="ubuntu@ec2-3-0-102-131.ap-southeast-1.compute.amazonaws.com"
                     ssh -o StrictHostKeyChecking=no -i "$SSH_KEY" $EC2_HOST 'echo "SSH connection successful"'
