@@ -2,14 +2,14 @@ pipeline {
     agent {
         docker {
             image 'maven:3.9.0'
-            args '-v /root/.m2:/root/.m2 --privileged --user root'
+            args '--dns=8.8.8.8 --network=host -v /var/jenkins_home:/var/jenkins_home -v /root/.m2:/root/.m2 --user root'
         }
     }
     
     stages {
         stage('Build') {
             steps {
-                sh 'mvn -B -DskipTests clean package -X'
+                sh 'mvn -B -DskipTests clean package'
             }
         }
 
