@@ -10,7 +10,7 @@ pipeline {
         EC2_HOST = "3.0.102.131"
         JAR_NAME = "target/*.jar"
         REMOTE_PATH = "/home/ubuntu/"
-        REMOTE_SCRIPT_PATH = "/home/ubuntu/deliver.sh"
+        REMOTE_SCRIPT_PATH = "/home/ubuntu/simple-java-maven-app/jenkins/scripts/deliver.sh"
         CREDENTIAL_ID = "ec2-key"
     }
     stages {
