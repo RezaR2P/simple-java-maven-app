@@ -40,17 +40,13 @@ pipeline {
                     def pemFile = '/home/Documents/0-reza/maspangsor.pem'
                     def artifactPath = 'target/my-app-1.0-SNAPSHOT.jar' 
 
-                    // Debugging: Pastikan file ada di dalam container
                     sh "ls -lah ${pemFile}"
 
-                    // Pastikan file memiliki izin yang benar
                     sh "chmod 400 ${pemFile}"
 
-                    // SCP untuk mengirimkan artifact ke EC2
-                    sh "scp -i ${pemFile} -o StrictHostKeyChecking=no ${artifactPath} ${ec2User}@${ec2Host}:/path/on/ec2/"
+                    sh "scp -i ${pemFile} -o StrictHostKeyChecking=no ${artifactPath} ${ec2User}@${ec2Host}:/home/Documents/0-reza/"
 
-                    // SSH untuk menjalankan deployment script di EC2
-                    sh "ssh -i ${pemFile} -o StrictHostKeyChecking=no ${ec2User}@${ec2Host} 'bash /path/on/ec2/deploy-script.sh'"
+                    sh "ssh -i ${pemFile} -o StrictHostKeyChecking=no ${ec2User}@${ec2Host} 'bash /home/Documents/0-reza/deploy-script.sh'"
                 }
                 sleep(time: 1, unit: 'MINUTES')
             }
