@@ -35,7 +35,7 @@ pipeline {
                     sh 'apt-get update && apt-get install -y openssh-client'
                     def ec2User = 'ubuntu'
                     def ec2Host = 'ec2-3-0-102-131.ap-southeast-1.compute.amazonaws.com' 
-                    def pemFile = '/home/rezar2p/Documents/0-reza/maspangsor.pem' 
+                    def pemFile = '/home/Documents/0-reza/maspangsor.pem' 
                     def artifactPath = 'target/my-app-1.0-SNAPSHOT.jar' 
 
                     sh "chmod 400 ${pemFile}"
