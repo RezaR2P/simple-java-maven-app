@@ -8,8 +8,8 @@ pipeline {
     environment {
         EC2_USER = "ubuntu"
         EC2_HOST = "3.0.102.131"
-        JAR_NAME = "target/*.jar" // Sesuaikan dengan nama file jar yang dihasilkan
-        REMOTE_PATH = "/home/ubuntu/" // Direktori tujuan di EC2
+        JAR_NAME = "target/*.jar"
+        REMOTE_PATH = "/home/ubuntu/"
         CREDENTIAL_ID = "ec2-key"
     }
     stages {
@@ -35,13 +35,16 @@ pipeline {
         }
         stage('Deploy') {
             steps {
-                withCredentials([sshUserPrivateKey(credentialsId: "${CREDENTIAL_ID}", keyFileVariable: 'SSH_KEY')]) {
+                withCredentials([sshUserPrivateKey(credentialsId: "${CREDENTIAL_ID}", keyFileVariable: 'SSH_KEY', usernameVariable: 'SSH_USER')]) {
                     sh '''
+                        echo "Installing SCP..."
+                        apt update && apt install -y openssh-client
+
                         echo "Uploading JAR file to EC2..."
-                        scp -o StrictHostKeyChecking=no -i $SSH_KEY $JAR_NAME $EC2_USER@$EC2_HOST:$REMOTE_PATH
+                        scp -o StrictHostKeyChecking=no -i $SSH_KEY $JAR_NAME $SSH_USER@$EC2_HOST:$REMOTE_PATH
                         
                         echo "Executing deploy script on EC2..."
-                        ssh -o StrictHostKeyChecking=no -i $SSH_KEY $EC2_USER@$EC2_HOST "chmod +x /home/ubuntu/jenkins/scripts/deliver.sh && /home/ubuntu/jenkins/scripts/deliver.sh"
+                        ssh -o StrictHostKeyChecking=no -i $SSH_KEY $SSH_USER@$EC2_HOST "chmod +x /home/ubuntu/jenkins/scripts/deliver.sh && /home/ubuntu/jenkins/scripts/deliver.sh"
 
                         echo "Sleeping for 1 minute to allow services to stabilize..."
                         sleep 60
