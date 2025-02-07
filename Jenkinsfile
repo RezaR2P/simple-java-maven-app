@@ -2,7 +2,7 @@ pipeline {
     agent {
         docker {
             image 'maven:3.9.0'
-            args '-v /root/.m2:/root/.m2 -v /home/rezar2p/Documents/0-reza/maspangsor.pem:/root/maspangsor.pem:ro --privileged --user root'
+            args '-v /home/rezar2p/Documents/0-reza/maspangsor.pem:/root/maspangsor.pem:ro --privileged --user root'
         }
     }
     
@@ -41,11 +41,11 @@ pipeline {
                     def artifactPath = 'target/my-app-1.0-SNAPSHOT.jar' 
 
                     // Debugging sebelum SCP
+                    sh "ls -lah /root"
                     sh "ls -lah ${pemFile}"
                     sh "test -f ${pemFile} && echo 'PEM File OK' || echo 'ERROR: PEM File NOT FOUND!'"
-                    sh "cat ${pemFile} | head -n 3"
 
-                    // Perbaiki izin
+                    // Pastikan izin benar
                     sh "chmod 600 ${pemFile}"
 
                     // SCP untuk mengirimkan artifact ke EC2
