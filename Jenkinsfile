@@ -2,11 +2,20 @@ pipeline {
     agent {
         docker {
             image 'maven:3.9.0'
-            args '-v /home/rezar2p/Documents/0-reza/maspangsor.pem:/root/maspangsor.pem:ro --privileged --user root'
+            args '-v /var/jenkins_home/workspace:/var/jenkins_home/workspace:rw,z -v /home/rezar2p/Documents/0-reza/maspangsor.pem:/root/maspangsor.pem:ro --privileged --user root'
         }
     }
 
     stages {
+        stage('Setup') {
+            steps {
+                script {
+                    // Install dependencies (Git dan OpenSSH)
+                    sh 'apt-get update && apt-get install -y git openssh-client'
+                }
+            }
+        }
+
         stage('Build') {
             steps {
                 sh 'mvn -B -DskipTests clean package'
@@ -33,24 +42,19 @@ pipeline {
         stage('Deploy') {
             steps {
                 script {
-                    // Install dependencies
-                    sh 'apt-get update && apt-get install -y openssh-client file'
-
                     def ec2User = 'ubuntu'
-                    def ec2Host = '3.0.102.131' // Gunakan IP langsung
+                    def ec2Host = '3.0.102.131'
                     def pemFile = '/root/maspangsor.pem'
                     def artifactPath = 'target/my-app-1.0-SNAPSHOT.jar'
 
-                    // Validasi file .pem bukan direktori
+                    // Pastikan file .pem ada dan memiliki izin yang benar
                     sh """
                         if [ ! -f ${pemFile} ]; then
                             echo 'ERROR: ${pemFile} bukan file!'
                             exit 1
                         fi
+                        chmod 600 ${pemFile}
                     """
-
-                    // Pastikan izin benar
-                    sh "chmod 600 ${pemFile}"
 
                     // Cek koneksi internet
                     sh "ping -c 4 8.8.8.8"
