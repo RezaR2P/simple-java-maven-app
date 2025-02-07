@@ -2,18 +2,22 @@ pipeline {
     agent {
         docker {
             image 'maven:3.9.0'
-            args '-v /var/jenkins_home:/var/jenkins_home -v /root/.m2:/root/.m2 --user root'
+            args '-v /root/.m2:/root/.m2 -v /var/jenkins_home:/var/jenkins_home --user root --privileged'
         }
     }
-
-    
+    environment {
+        EC2_USER = "ubuntu"
+        EC2_HOST = "3.0.102.131"
+        JAR_NAME = "target/*.jar" // Sesuaikan dengan nama file jar yang dihasilkan
+        REMOTE_PATH = "/home/ubuntu/" // Direktori tujuan di EC2
+        CREDENTIAL_ID = "ec2-key"
+    }
     stages {
         stage('Build') {
             steps {
                 sh 'mvn -B -DskipTests clean package'
             }
         }
-
         stage('Test') {
             steps {
                 sh 'mvn test'
@@ -24,34 +28,24 @@ pipeline {
                 }
             }
         }
-
         stage('Manual Approval') {
             steps {
                 input(message: 'Lanjutkan ke tahap Deploy?', ok: 'Proceed')
             }
         }
-
         stage('Deploy') {
             steps {
-                script {
-                    sh 'apt-get update && apt-get install -y openssh-client'
-
-                    def ec2User = env.EC2_USER ?: 'ubuntu'
-                    def ec2Host = env.EC2_HOST ?: 'ec2-3-0-102-131.ap-southeast-1.compute.amazonaws.com'
-                    def artifactPath = 'target/*.jar' 
-
-                    // Ambil file .pem dari Jenkins Credentials Manager
-                    withCredentials([file(credentialsId: 'ec2-key', variable: 'PEM_FILE')]) {
-                        // SCP untuk mengirimkan artifact ke EC2
-                        def scpCommand = "scp -i $PEM_FILE -o StrictHostKeyChecking=no ${artifactPath} ${ec2User}@${ec2Host}:/home/ubuntu/"
-                        sh scpCommand || error("SCP command failed")
-
-                        // SSH untuk menjalankan deployment script di EC2
-                        def sshCommand = "ssh -i $PEM_FILE -o StrictHostKeyChecking=no ${ec2User}@${ec2Host} 'bash /home/ubuntu/deploy-script.sh'"
-                        sh sshCommand || error("SSH command failed")
-                    }
+                withCredentials([sshUserPrivateKey(credentialsId: "${CREDENTIAL_ID}", keyFileVariable: 'SSH_KEY')]) {
+                    sh '''
+                        echo "Uploading JAR file to EC2..."
+                        scp -o StrictHostKeyChecking=no -i $SSH_KEY $JAR_NAME $EC2_USER@$EC2_HOST:$REMOTE_PATH
+                        
+                        echo "Executing deploy script on EC2..."
+                        ssh -o StrictHostKeyChecking=no -i $SSH_KEY $EC2_USER@$EC2_HOST "chmod +x /home/ubuntu/jenkins/scripts/deliver.sh && /home/ubuntu/jenkins/scripts/deliver.sh"
+                    '''
                 }
             }
+            sleep(time: 1, unit: 'MINUTES')
         }
     }
 }
