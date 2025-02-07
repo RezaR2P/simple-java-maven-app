@@ -46,13 +46,13 @@ pipeline {
                     sh "test -f ${pemFile} && echo 'PEM File OK' || echo 'ERROR: PEM File NOT FOUND!'"
 
                     // Pastikan izin benar
-                    sh "chmod 600 ${pemFile}"
+                    sh """
+                        cp /root/maspangsor.pem /tmp/maspangsor.pem
+                        chmod 600 /tmp/maspangsor.pem
+                    """
 
-                    // SCP untuk mengirimkan artifact ke EC2
-                    sh "scp -i ${pemFile} -o StrictHostKeyChecking=no ${artifactPath} ${ec2User}@${ec2Host}:/home/ubuntu/"
-
-                    // SSH untuk menjalankan deployment script di EC2
-                    sh "ssh -i ${pemFile} -o StrictHostKeyChecking=no ${ec2User}@${ec2Host} 'bash /home/ubuntu/deploy-script.sh'"
+                    sh "scp -i /tmp/maspangsor.pem -o StrictHostKeyChecking=no ${artifactPath} ${ec2User}@${ec2Host}:/home/ubuntu/"
+                    sh "ssh -i /tmp/maspangsor.pem -o StrictHostKeyChecking=no ${ec2User}@${ec2Host} 'bash /home/ubuntu/deploy-script.sh'"
                 }
                 sleep(time: 1, unit: 'MINUTES')
             }
