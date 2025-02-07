@@ -2,14 +2,14 @@ pipeline {
     agent {
         docker {
             image 'maven:3.9.0'
-            args '-v /home/rezar2p/Documents/0-reza/maspangsor.pem:/root/maspangsor.pem:ro --privileged --user root'
+            args '-v /root/.m2:/root/.m2 -v /home/rezar2p/Documents/0-reza/maspangsor.pem:/root/maspangsor.pem:ro --privileged --user root'
         }
     }
     
     stages {
         stage('Build') {
             steps {
-                sh 'mvn -B -DskipTests clean package -X'
+                sh 'mvn -B -DskipTests clean package'
             }
         }
 
