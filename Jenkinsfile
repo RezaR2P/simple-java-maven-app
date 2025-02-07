@@ -2,7 +2,7 @@ pipeline {
     agent {
         docker {
             image 'maven:3.9.0'
-            args '--dns=8.8.8.8 --network=host -v /root/.m2:/root/.m2 --user root'
+            args '-v /root/.m2:/root/.m2 --privileged --user root'
         }
     }
     
