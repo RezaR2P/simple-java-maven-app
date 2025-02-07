@@ -42,10 +42,10 @@ pipeline {
 
                     // Debugging sebelum SCP
                     sh "ls -lah ${pemFile}"
-                    sh "file ${pemFile}"
                     sh "test -f ${pemFile} && echo 'PEM File OK' || echo 'ERROR: PEM File NOT FOUND!'"
+                    sh "cat ${pemFile} | head -n 3"
 
-                    // Set permission yang benar untuk SSH Key
+                    // Perbaiki izin
                     sh "chmod 600 ${pemFile}"
 
                     // SCP untuk mengirimkan artifact ke EC2
