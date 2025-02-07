@@ -44,9 +44,8 @@ pipeline {
 
                     sh "chmod 400 ${pemFile}"
 
-                    sh "scp -i ${pemFile} -o StrictHostKeyChecking=no ${artifactPath} ${ec2User}@${ec2Host}:/home/Documents/0-reza/"
-
-                    sh "ssh -i ${pemFile} -o StrictHostKeyChecking=no ${ec2User}@${ec2Host} 'bash /home/Documents/0-reza/deploy-script.sh'"
+                    sh "scp -i ${pemFile} -o StrictHostKeyChecking=no ${artifactPath} ${ec2User}@${ec2Host}:/home/ubuntu/"
+                    sh "ssh -i ${pemFile} -o StrictHostKeyChecking=no ${ec2User}@${ec2Host} 'bash /home/ubuntu/deploy-script.sh'"
                 }
                 sleep(time: 1, unit: 'MINUTES')
             }
