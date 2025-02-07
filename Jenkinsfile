@@ -2,7 +2,7 @@ pipeline {
     agent {
         docker {
             image 'maven:3.9.0'
-            args '--dns=8.8.8.8 --network=host -v /root/.m2:/root/.m2'
+            args '--dns=8.8.8.8 --network=host -v /root/.m2:/root/.m2 --user root'
         }
     }
 
@@ -47,7 +47,7 @@ pipeline {
             steps {
                 script {
                     def ec2User = 'ubuntu'
-                    def ec2Host = '3.0.102.131' // Gunakan IP langsung
+                    def ec2Host = '3.0.102.131'
                     def artifactPath = 'target/my-app-1.0-SNAPSHOT.jar'
 
                     // Ambil file .pem dari Jenkins Credentials Manager
