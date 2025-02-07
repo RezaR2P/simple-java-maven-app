@@ -5,6 +5,7 @@ pipeline {
             args '-v /root/.m2:/root/.m2 -v /home/Documents/0-reza/maspangsor.pem:/home/Documents/0-reza/maspangsor.pem --privileged --user root'
         }
     }
+    
     stages {
         stage('Build') {
             steps {
@@ -33,14 +34,19 @@ pipeline {
             steps {
                 script {
                     sh 'apt-get update && apt-get install -y openssh-client'
+
                     def ec2User = 'ubuntu'
                     def ec2Host = 'ec2-3-0-102-131.ap-southeast-1.compute.amazonaws.com' 
                     def pemFile = '/home/Documents/0-reza/maspangsor.pem' 
                     def artifactPath = 'target/my-app-1.0-SNAPSHOT.jar' 
 
+                    sh "ls -lah ${pemFile}"
+                    sh "file ${pemFile}"
+
                     sh "chmod 400 ${pemFile}"
 
                     sh "scp -i ${pemFile} -o StrictHostKeyChecking=no ${artifactPath} ${ec2User}@${ec2Host}:/path/on/ec2/"
+
                     sh "ssh -i ${pemFile} -o StrictHostKeyChecking=no ${ec2User}@${ec2Host} 'bash /path/on/ec2/deploy-script.sh'"
                 }
                 sleep(time: 1, unit: 'MINUTES')
