@@ -42,10 +42,12 @@ pipeline {
                         
                         echo "Executing deploy script on EC2..."
                         ssh -o StrictHostKeyChecking=no -i $SSH_KEY $EC2_USER@$EC2_HOST "chmod +x /home/ubuntu/jenkins/scripts/deliver.sh && /home/ubuntu/jenkins/scripts/deliver.sh"
+
+                        echo "Sleeping for 1 minute to allow services to stabilize..."
+                        sleep 60
                     '''
                 }
             }
-            sleep(time: 1, unit: 'MINUTES')
         }
     }
 }
