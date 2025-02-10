@@ -38,29 +38,23 @@ pipeline {
             steps {
                 withCredentials([sshUserPrivateKey(credentialsId: "${CREDENTIAL_ID}", keyFileVariable: 'SSH_KEY', usernameVariable: 'SSH_USER')]) {
                     sh '''
-                        echo "Installing SCP and SSH client..."
-                        apt update && apt install -y openssh-client
-                        logger "Installing SCP and SSH client..."
+                        echo "Menginstal SSH client..."
+                        apt-get update && apt-get install -y openssh-client
 
-                        echo "Ensuring project directory exists in EC2..."
-                        ssh -o StrictHostKeyChecking=no -i $SSH_KEY $SSH_USER@$EC2_HOST "mkdir -p $PROJECT_DIR"
-                        logger "Ensured project directory exists in EC2 at $PROJECT_DIR"
+                        echo "Membuat direktori proyek di EC2..."
+                        ssh -o StrictHostKeyChecking=no -i $SSH_KEY $EC2_USER@$EC2_HOST "mkdir -p $PROJECT_DIR && logger 'DIRECTORY_CREATED: $PROJECT_DIR'"
 
-                        echo "Uploading project files to EC2..."
-                        scp -o StrictHostKeyChecking=no -i $SSH_KEY -r * $SSH_USER@$EC2_HOST:$PROJECT_DIR
-                        logger "Uploaded project files to EC2"
+                        echo "Mengupload file..."
+                        scp -o StrictHostKeyChecking=no -i $SSH_KEY -r * $EC2_USER@$EC2_HOST:$PROJECT_DIR
 
-                        echo "Granting execute permission to deliver.sh..."
-                        ssh -o StrictHostKeyChecking=no -i $SSH_KEY $SSH_USER@$EC2_HOST "chmod +x $PROJECT_DIR/jenkins/scripts/deliver.sh"
-                        logger "Granted execute permission to deliver.sh"
+                        echo "Memberikan izin eksekusi..."
+                        ssh -o StrictHostKeyChecking=no -i $SSH_KEY $EC2_USER@$EC2_HOST "chmod +x $PROJECT_DIR/jenkins/scripts/deliver.sh && logger 'PERMISSIONS_GRANTED: deliver.sh'"
 
-                        echo "Executing deliver.sh in the correct directory..."
-                        ssh -o StrictHostKeyChecking=no -i $SSH_KEY $SSH_USER@$EC2_HOST "cd $PROJECT_DIR && ./jenkins/scripts/deliver.sh"
-                        logger "Executed deliver.sh in $PROJECT_DIR"
+                        echo "Menjalankan deploy script..."
+                        ssh -o StrictHostKeyChecking=no -i $SSH_KEY $EC2_USER@$EC2_HOST "cd $PROJECT_DIR && ./jenkins/scripts/deliver.sh && logger 'DEPLOY_EXECUTED: deliver.sh'"
 
-                        echo "Sleeping for 1 minute to allow services to stabilize..."
+                        echo "Menunggu stabilisasi..."
                         sleep 60
-                        logger "Sleeping for 1 minute to allow services to stabilize..."
                     '''
                 }
             }
