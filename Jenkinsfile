@@ -45,7 +45,7 @@ pipeline {
                         ssh -o StrictHostKeyChecking=no -i $SSH_KEY $EC2_USER@$EC2_HOST "mkdir -p $PROJECT_DIR && logger 'DIRECTORY_CREATED: $PROJECT_DIR'"
 
                         echo "Mengupload file..."
-                        scp -o StrictHostKeyChecking=no -i $SSH_KEY -r * $EC2_USER@$EC2_HOST:$PROJECT_DIR
+                        scp -o StrictHostKeyChecking=no -i $SSH_KEY -r * $EC2_USER@$EC2_HOST:$PROJECT_DIR && logger 'Deploy Project Ke EC2 Sukses!'
 
                         echo "Memberikan izin eksekusi..."
                         ssh -o StrictHostKeyChecking=no -i $SSH_KEY $EC2_USER@$EC2_HOST "chmod +x $PROJECT_DIR/jenkins/scripts/deliver.sh && logger 'PERMISSIONS_GRANTED: deliver.sh'"
