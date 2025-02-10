@@ -2,7 +2,7 @@ pipeline {
     agent {
         docker {
             image 'maven:3.9.0'
-            args '-v /root/.m2:/root/.m2 -u root --privileged'
+            args '-v /root/.m2:/root/.m2 -v /var/jenkins_home:/var/jenkins_home --user root --privileged'
         }
     }
     environment {
@@ -14,13 +14,13 @@ pipeline {
     stages {
         stage('Build') {
             steps {
-                echo "Membangun aplikasi Java..."
+                echo "Building Java application..."
                 sh 'mvn -B -DskipTests clean package'
             }
         }
         stage('Test') {
             steps {
-                echo "Menjalankan testing..."
+                echo "Running tests..."
                 sh 'mvn test'
             }
             post {
@@ -29,29 +29,29 @@ pipeline {
                 }
             }
         }
-        stage('Persetujuan Manual') {
+        stage('Manual Approval') {
             steps {
-                input(message: 'Lanjut ke tahap deploy?', ok: 'Lanjut')
+                input(message: 'Lanjutkan ke tahap Deploy?', ok: 'Proceed')
             }
         }
         stage('Deploy') {
             steps {
                 withCredentials([sshUserPrivateKey(credentialsId: "${CREDENTIAL_ID}", keyFileVariable: 'SSH_KEY', usernameVariable: 'SSH_USER')]) {
                     sh '''
-                        echo "Memasang SSH client..."
+                        echo "Menginstal SSH client..."
                         apt-get update && apt-get install -y openssh-client
 
-                        echo "Membuat direktori di EC2..."
-                        ssh -o StrictHostKeyChecking=no -i $SSH_KEY $EC2_USER@$EC2_HOST "mkdir -p $PROJECT_DIR && logger -t DEPLOY_JENKINS 'Direktori $PROJECT_DIR dibuat'"
+                        echo "Membuat direktori proyek di EC2..."
+                        ssh -o StrictHostKeyChecking=no -i $SSH_KEY $EC2_USER@$EC2_HOST "mkdir -p $PROJECT_DIR && logger 'DIRECTORY_CREATED: $PROJECT_DIR'"
 
-                        echo "Mengunggah file ke EC2..."
+                        echo "Mengupload file..."
                         scp -o StrictHostKeyChecking=no -i $SSH_KEY -r * $EC2_USER@$EC2_HOST:$PROJECT_DIR
 
-                        echo "Memberi hak akses..."
-                        ssh -o StrictHostKeyChecking=no -i $SSH_KEY $EC2_USER@$EC2_HOST "chmod +x $PROJECT_DIR/jenkins/scripts/deliver.sh && logger -t DEPLOY_JENKINS 'Izin execute diberikan ke deliver.sh'"
+                        echo "Memberikan izin eksekusi..."
+                        ssh -o StrictHostKeyChecking=no -i $SSH_KEY $EC2_USER@$EC2_HOST "chmod +x $PROJECT_DIR/jenkins/scripts/deliver.sh && logger 'PERMISSIONS_GRANTED: deliver.sh'"
 
-                        echo "Menjalankan script deploy..."
-                        ssh -o StrictHostKeyChecking=no -i $SSH_KEY $EC2_USER@$EC2_HOST "cd $PROJECT_DIR && ./jenkins/scripts/deliver.sh && logger -t DEPLOY_JENKINS 'Script deliver.sh dijalankan'"
+                        echo "Menjalankan deploy script..."
+                        ssh -o StrictHostKeyChecking=no -i $SSH_KEY $EC2_USER@$EC2_HOST "cd $PROJECT_DIR && ./jenkins/scripts/deliver.sh && logger 'DEPLOY_EXECUTED: deliver.sh'"
 
                         echo "Menunggu stabilisasi..."
                         sleep 60
