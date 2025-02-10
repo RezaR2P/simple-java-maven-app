@@ -40,21 +40,27 @@ pipeline {
                     sh '''
                         echo "Installing SCP and SSH client..."
                         apt update && apt install -y openssh-client
+                        logger "Installing SCP and SSH client..."
 
                         echo "Ensuring project directory exists in EC2..."
                         ssh -o StrictHostKeyChecking=no -i $SSH_KEY $SSH_USER@$EC2_HOST "mkdir -p $PROJECT_DIR"
+                        logger "Ensured project directory exists in EC2 at $PROJECT_DIR"
 
                         echo "Uploading project files to EC2..."
                         scp -o StrictHostKeyChecking=no -i $SSH_KEY -r * $SSH_USER@$EC2_HOST:$PROJECT_DIR
+                        logger "Uploaded project files to EC2"
 
                         echo "Granting execute permission to deliver.sh..."
                         ssh -o StrictHostKeyChecking=no -i $SSH_KEY $SSH_USER@$EC2_HOST "chmod +x $PROJECT_DIR/jenkins/scripts/deliver.sh"
+                        logger "Granted execute permission to deliver.sh"
 
                         echo "Executing deliver.sh in the correct directory..."
                         ssh -o StrictHostKeyChecking=no -i $SSH_KEY $SSH_USER@$EC2_HOST "cd $PROJECT_DIR && ./jenkins/scripts/deliver.sh"
+                        logger "Executed deliver.sh in $PROJECT_DIR"
 
                         echo "Sleeping for 1 minute to allow services to stabilize..."
                         sleep 60
+                        logger "Sleeping for 1 minute to allow services to stabilize..."
                     '''
                 }
             }
